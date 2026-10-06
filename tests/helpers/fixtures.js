@@ -2,7 +2,10 @@
 
 const PAYER = 'FeePayer1111111111111111111111111111111111';
 
-/** A minimal jsonParsed getTransaction result. */
+/**
+ * A minimal jsonParsed getTransaction result.
+ * By default every account holds 1 SOL before, and the fee payer pays the fee.
+ */
 function makeTx({
   err = null,
   fee = 5000,
@@ -11,6 +14,10 @@ function makeTx({
   slot = 300000000,
   blockTime = 1767225600, // 2026-01-01T00:00:00Z
   version = 0,
+  preBalances,
+  postBalances,
+  preTokenBalances = [],
+  postTokenBalances = [],
 } = {}) {
   const accountKeys = [
     ...signers.map((pubkey) => ({
@@ -27,13 +34,33 @@ function makeTx({
     })),
   ];
 
+  const pre = preBalances || accountKeys.map(() => 1_000_000_000);
+  const post = postBalances || pre.map((balance, i) => (i === 0 ? balance - fee : balance));
+
   return {
     slot,
     blockTime,
     version,
-    meta: { err, fee },
+    meta: {
+      err,
+      fee,
+      preBalances: pre,
+      postBalances: post,
+      preTokenBalances,
+      postTokenBalances,
+    },
     transaction: { message: { accountKeys }, signatures: [] },
   };
 }
 
-module.exports = { PAYER, makeTx };
+/** A token balance entry as the RPC returns it. */
+function tokenBalance(accountIndex, owner, mint, amount, decimals) {
+  return {
+    accountIndex,
+    mint,
+    owner,
+    uiTokenAmount: { amount: String(amount), decimals },
+  };
+}
+
+module.exports = { PAYER, makeTx, tokenBalance };
