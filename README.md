@@ -4,7 +4,7 @@ Paste a Solana transaction signature, get a plain-English summary.
 
 Zero dependencies. Node 18+.
 
-> **Status: early.** v0.1 only validates the signature. Fetching and explaining transactions lands in the next releases.
+> **Status: early.** Right now it reports status, time, fee, fee payer and signers. Balance changes, program names and a headline are coming in the next releases.
 
 ## Usage
 
@@ -18,18 +18,44 @@ Or from a clone:
 node bin/sol-tx-explain.js <signature>
 ```
 
+Example output:
+
+```
+Signature  <signature>
+Status     Success
+Time       2026-01-01T00:00:00Z (slot 300000000)
+Fee        0.000005 SOL (5000 lamports)
+Fee payer  <address>
+Signers    <address>
+Version    0
+RPC        api.mainnet-beta.solana.com
+```
+
+A transaction that failed on-chain is still explained (exit code 0), with its error shown on an `Error` line.
+
+## Use your own RPC
+
+The public RPC rate-limits and prunes old transactions. Point the tool at your own endpoint:
+
+```bash
+export SOL_TX_EXPLAIN_RPC="https://your-rpc-endpoint"
+```
+
+Only the RPC hostname is ever printed, never the full URL, so API keys in the path or query string stay out of your terminal output.
+
 ## What it will do
 
-- Say whether the transaction succeeded or failed, and explain the error if it failed
-- Show the fee and the fee payer
-- Show SOL balance changes and token balance changes with formatted amounts
-- List the programs called, with friendly names
-- Give a one-line headline
+- [x] Say whether the transaction succeeded or failed, with the error
+- [x] Show the fee and the fee payer
+- [ ] Show SOL balance changes and token balance changes with formatted amounts
+- [ ] List the programs called, with friendly names
+- [ ] Give a one-line headline
 
 ## Honest limits
 
-- The headline is a guess based on balance changes, not a certainty.
-- Public RPC endpoints prune old transactions and rate-limit requests, so older transactions may not be found. Use your own RPC if you hit this.
+- The headline (coming soon) is a guess based on balance changes, not a certainty.
+- Public RPC endpoints prune old transactions and rate-limit requests, so older transactions may not be found.
+- Queries mainnet by default. For devnet or testnet, set `SOL_TX_EXPLAIN_RPC` to a matching endpoint.
 
 ## Development
 
