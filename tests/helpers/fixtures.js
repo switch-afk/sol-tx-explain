@@ -18,6 +18,8 @@ function makeTx({
   postBalances,
   preTokenBalances = [],
   postTokenBalances = [],
+  instructions = [],
+  innerInstructions = [],
 } = {}) {
   const accountKeys = [
     ...signers.map((pubkey) => ({
@@ -48,8 +50,9 @@ function makeTx({
       postBalances: post,
       preTokenBalances,
       postTokenBalances,
+      innerInstructions,
     },
-    transaction: { message: { accountKeys }, signatures: [] },
+    transaction: { message: { accountKeys, instructions }, signatures: [] },
   };
 }
 

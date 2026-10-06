@@ -1,36 +1,10 @@
 'use strict';
 
+const { formatLamports, formatUnits, withSign } = require('./format');
+const { KNOWN_MINTS } = require('./labels');
+const { summarizeInstructions } = require('./programs');
+
 const MAX_ROWS = 15;
-
-// A few well-known mints so the output reads nicely. Anything else shows its mint address.
-const KNOWN_MINTS = {
-  So11111111111111111111111111111111111111112: 'wSOL',
-  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v: 'USDC',
-  Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB: 'USDT',
-};
-
-/** Exact integer-with-decimals formatting (BigInt), trailing zeros trimmed. */
-function formatUnits(value, decimals) {
-  const v = BigInt(value);
-  const negative = v < 0n;
-  const abs = negative ? -v : v;
-  const base = 10n ** BigInt(decimals);
-  const whole = abs / base;
-  const fraction =
-    decimals > 0
-      ? (abs % base).toString().padStart(decimals, '0').replace(/0+$/, '')
-      : '';
-  return `${negative ? '-' : ''}${whole}${fraction ? `.${fraction}` : ''}`;
-}
-
-/** Lamports to a SOL string. */
-function formatLamports(lamports) {
-  return formatUnits(lamports, 9);
-}
-
-function withSign(text) {
-  return text.startsWith('-') ? text : `+${text}`;
-}
 
 function formatTime(blockTime) {
   if (typeof blockTime !== 'number') return 'unknown';
@@ -132,6 +106,7 @@ function summarizeTransaction(result) {
     version: result.version === undefined ? 'legacy' : String(result.version),
     solChanges: computeSolChanges(keys, meta),
     tokenChanges: computeTokenChanges(keys, meta),
+    ...summarizeInstructions(result),
   };
 }
 
@@ -180,6 +155,17 @@ function formatSummary(summary, { signature, host }) {
     return `${change.owner}  ${withSign(change.amount)} ${what}`;
   });
   lines.push(...section('Token changes', tokenRows, 'none'));
+
+  const programRows = summary.programs.map(
+    (program) => program.label || `${program.programId} (unlabeled)`
+  );
+  lines.push(...section('Programs', programRows, 'none'));
+
+  const instructionRows = summary.instructions.map((ix) => {
+    const inner = ix.inner ? ` (+${ix.inner} inner call${ix.inner === 1 ? '' : 's'})` : '';
+    return `${ix.number}. ${ix.program}: ${ix.text}${inner}`;
+  });
+  lines.push(...section('Instructions', instructionRows, 'none'));
 
   return `${lines.join('\n')}\n`;
 }
