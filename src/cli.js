@@ -3,19 +3,21 @@
 const pkg = require('../package.json');
 const { SignatureError, validateSignature } = require('./signature');
 const { ENV_VAR, RpcError, getRpcUrl, hostLabel, rpcCall } = require('./rpc');
-const { formatSummary, summarizeTransaction } = require('./explain');
+const { formatSummary, summarizeTransaction, toJson } = require('./explain');
 
 const DEFAULT_MAX_VERSION = 1;
 const MAX_VERSION_RETRIES = 3;
+const KNOWN_FLAGS = new Set(['--json']);
 
 const HELP = `sol-tx-explain v${pkg.version}
 
 Paste a Solana transaction signature, get a plain-English summary.
 
 Usage:
-  sol-tx-explain <signature>
+  sol-tx-explain [--json] <signature>
 
 Options:
+  --json           Print machine-readable JSON instead of text
   -h, --help       Show this help
   -v, --version    Show the version
 
@@ -86,19 +88,24 @@ async function run(argv, io = {}) {
     return 0;
   }
 
-  const unknown = argv.find((arg) => arg.startsWith('-'));
+  const flags = argv.filter((arg) => arg.startsWith('-'));
+  const positional = argv.filter((arg) => !arg.startsWith('-'));
+
+  const unknown = flags.find((flag) => !KNOWN_FLAGS.has(flag));
   if (unknown) {
     stderr.write(`Unknown option: ${unknown}\n\n${HELP}`);
     return 2;
   }
 
-  if (argv.length !== 1) {
+  if (positional.length !== 1) {
     stderr.write(`Expected exactly one signature.\n\n${HELP}`);
     return 2;
   }
 
+  const json = flags.includes('--json');
+
   try {
-    const signature = validateSignature(argv[0]);
+    const signature = validateSignature(positional[0]);
     const url = getRpcUrl(env);
     const host = hostLabel(url);
 
@@ -113,7 +120,12 @@ async function run(argv, io = {}) {
       return 1;
     }
 
-    stdout.write(formatSummary(summarizeTransaction(result), { signature, host }));
+    const summary = summarizeTransaction(result);
+    if (json) {
+      stdout.write(`${JSON.stringify(toJson(summary, { signature, host }), null, 2)}\n`);
+    } else {
+      stdout.write(formatSummary(summary, { signature, host }));
+    }
     return 0;
   } catch (error) {
     if (error instanceof SignatureError) {

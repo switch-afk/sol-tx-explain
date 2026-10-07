@@ -1,6 +1,8 @@
 'use strict';
 
+const { describeErrorHint } = require('./errors');
 const { formatLamports, formatUnits, withSign } = require('./format');
+const { buildHeadline } = require('./headline');
 const { KNOWN_MINTS } = require('./labels');
 const { summarizeInstructions } = require('./programs');
 
@@ -95,7 +97,7 @@ function summarizeTransaction(result) {
   const meta = result.meta || {};
   const error = describeError(meta.err);
 
-  return {
+  const summary = {
     status: error ? 'failed' : 'success',
     error,
     fee: meta.fee,
@@ -108,6 +110,10 @@ function summarizeTransaction(result) {
     tokenChanges: computeTokenChanges(keys, meta),
     ...summarizeInstructions(result),
   };
+
+  summary.errorHint = describeErrorHint(meta.err, summary.instructions);
+  summary.headline = buildHeadline(summary);
+  return summary;
 }
 
 function row(label, value) {
@@ -128,9 +134,11 @@ function formatSummary(summary, { signature, host }) {
   const lines = [
     row('Signature', signature),
     row('Status', summary.status === 'success' ? 'Success' : 'Failed'),
+    row('Summary', summary.headline.text),
   ];
 
   if (summary.error) lines.push(row('Error', summary.error));
+  if (summary.errorHint) lines.push(row('Why', summary.errorHint));
 
   lines.push(
     row('Time', `${summary.time} (slot ${summary.slot})`),
@@ -170,6 +178,28 @@ function formatSummary(summary, { signature, host }) {
   return `${lines.join('\n')}\n`;
 }
 
+/** The same summary as a plain object, ready for JSON.stringify. */
+function toJson(summary, { signature, host }) {
+  return {
+    signature,
+    rpc: host,
+    status: summary.status,
+    headline: summary.headline,
+    error: summary.error,
+    errorHint: summary.errorHint,
+    time: summary.time,
+    slot: summary.slot,
+    version: summary.version,
+    fee: { lamports: summary.fee, sol: formatLamports(summary.fee) },
+    feePayer: summary.feePayer,
+    signers: summary.signers,
+    solChanges: summary.solChanges,
+    tokenChanges: summary.tokenChanges,
+    programs: summary.programs,
+    instructions: summary.instructions,
+  };
+}
+
 module.exports = {
   KNOWN_MINTS,
   MAX_ROWS,
@@ -181,4 +211,5 @@ module.exports = {
   formatTime,
   formatUnits,
   summarizeTransaction,
+  toJson,
 };
