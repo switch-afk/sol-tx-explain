@@ -20,11 +20,26 @@ const PROGRAM_LABELS = {
   CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK: 'Raydium CLMM',
   whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc: 'Orca Whirlpools',
   LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo: 'Meteora DLMM',
-  Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB: 'Meteora Pools',
+  Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB: 'Meteora DAMM v1',
+  cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG: 'Meteora DAMM v2',
   '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P': 'Pump.fun',
   pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA: 'PumpSwap',
   pfeeUxB6jkeY1Hxd7CsFCAjcbHA9rWtchMGdZ6VojVZ: 'Pump Fees',
 };
+
+// Labels of programs that trade tokens, used to say "via ..." in the summary line.
+const DEX_LABELS = new Set([
+  'Jupiter Aggregator v6',
+  'Raydium AMM v4',
+  'Raydium CPMM',
+  'Raydium CLMM',
+  'Orca Whirlpools',
+  'Meteora DLMM',
+  'Meteora DAMM v1',
+  'Meteora DAMM v2',
+  'Pump.fun',
+  'PumpSwap',
+]);
 
 // A few well-known mints so the output reads nicely. Anything else shows its mint address.
 const KNOWN_MINTS = {
@@ -39,4 +54,10 @@ function programLabel(programId) {
   return PROGRAM_LABELS[programId] || null;
 }
 
-module.exports = { COMPUTE_BUDGET_ID, KNOWN_MINTS, PROGRAM_LABELS, programLabel };
+module.exports = {
+  COMPUTE_BUDGET_ID,
+  DEX_LABELS,
+  KNOWN_MINTS,
+  PROGRAM_LABELS,
+  programLabel,
+};
