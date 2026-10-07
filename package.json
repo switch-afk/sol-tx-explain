@@ -1,21 +1,31 @@
 {
   "name": "sol-tx-explain",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Paste a Solana transaction signature, get a plain-English summary.",
   "bin": {
     "sol-tx-explain": "bin/sol-tx-explain.js"
   },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "test": "node --test"
   },
   "engines": {
     "node": ">=18"
   },
-  "keywords": ["solana", "transaction", "explain", "cli"],
+  "keywords": ["solana", "transaction", "explain", "cli", "json"],
   "author": "switch-afk",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/switch-afk/sol-tx-explain.git"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/switch-afk/sol-tx-explain/issues"
+  },
+  "homepage": "https://github.com/switch-afk/sol-tx-explain#readme"
 }

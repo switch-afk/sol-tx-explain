@@ -21,7 +21,7 @@ Example output:
 ```
 Signature  <signature>
 Status     Success
-Summary    Likely a swap: sent 17960.851474 tokens (mint 4NdR...pMW2), received 0.029596831 SOL via Meteora DAMM v2
+Summary    Likely a swap: sent 17960.851474 tokens (mint 4NdR...oMW2), received 0.029596831 SOL via Meteora DAMM v2
 Time       2026-01-01T00:00:00Z (slot 300000000)
 Fee        0.000115 SOL (115000 lamports)
 Fee payer  <address>
@@ -84,6 +84,7 @@ Only the RPC hostname is ever printed, never the full URL, so API keys in the pa
 ## Honest limits
 
 - **The Summary line is a guess.** It looks only at what happened to the fee payer's balances (with the fee taken out) and which known trading programs were involved. It can be wrong, for example when the fee payer is a relayer, when a swap is split across several wallets, or when rent paid for new accounts makes a small SOL amount look like part of a trade. That is why it says "Likely". The balance changes below it are the facts.
+- **Amounts are what the fee payer netted.** Block explorers often show the gross amounts a pool paid out. When the same transaction also sends a share to another account (a platform fee, for example), this tool's figure for the fee payer is smaller than the explorer's. Both are right; they answer different questions. The full movements are in the changes below the summary.
 - Balance changes are net per account (after minus before). An account's change includes fees and any rent paid or refunded, so a number can differ from what a single instruction moved.
 - Token changes are netted per owner and mint. Only wSOL, USDC and USDT get a name; every other token shows its mint address.
 - Program names come from a small built-in list. Any program not on it is shown by address as "unlabeled".
