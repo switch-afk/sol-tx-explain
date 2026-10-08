@@ -2,7 +2,7 @@
 
 Paste a Solana transaction signature, get a plain-English summary.
 
-Zero dependencies. Node 18+.
+Zero dependencies. Node 18+. Works as a CLI and as a library.
 
 ## Usage
 
@@ -61,6 +61,38 @@ npx sol-tx-explain --json <signature>
 
 Prints one JSON document with the same information (status, headline, error and hint, fee, fee payer, signers, SOL and token changes, programs, instructions). Amounts are strings so nothing is rounded. Errors still go to stderr as plain text, with the same exit codes.
 
+## Use as a library
+
+```bash
+npm install sol-tx-explain
+```
+
+```js
+const { explainTransaction } = require('sol-tx-explain');
+
+const result = await explainTransaction(signature, {
+  rpcUrl: process.env.MY_RPC,
+});
+
+if (result === null) {
+  // the RPC does not have this transaction (yet)
+} else {
+  console.log(result.summary.headline.text); // "Likely a swap: ..."
+  console.log(result.text);                  // the same text the CLI prints
+  console.log(result.json);                  // the same object as --json
+}
+```
+
+`explainTransaction(signature, options)`:
+
+- `rpcUrl`: your RPC endpoint. Defaults to `SOL_TX_EXPLAIN_RPC`, then the public RPC.
+- `env`: environment object to read the default RPC from (defaults to `process.env`).
+- `rpcOptions`: `{ retries, retryDelayMs, timeoutMs }` for the RPC client.
+
+It returns `null` when the transaction is not found, otherwise `{ signature, host, summary, json, text }`. It throws `SignatureError` for a malformed signature and `RpcError` for RPC problems. Only the RPC hostname is ever included in the results, never the full URL.
+
+Also exported: `summarizeTransaction`, `formatSummary`, `toJson`, `buildHeadline`, `validateSignature`, `SignatureError` and `RpcError`. The package is CommonJS.
+
 ## Use your own RPC
 
 The public RPC rate-limits and prunes old transactions. Point the tool at your own endpoint:
@@ -80,6 +112,7 @@ Only the RPC hostname is ever printed, never the full URL, so API keys in the pa
 - [x] Summarises each instruction
 - [x] Gives a one-line summary
 - [x] Machine-readable `--json` output
+- [x] Importable as a library
 
 ## Honest limits
 

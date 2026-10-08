@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1
+
+- Adds a library entry point: `require('sol-tx-explain')` now works, with `explainTransaction(signature, { rpcUrl })` returning the summary, the JSON form and the text form
+- `explainTransaction` returns `null` when the RPC does not have the transaction yet, so callers can retry
+- Moves transaction fetching (including the transaction version retry) into its own module so the CLI and the library share it
+- No change to CLI behaviour or output
+
 ## 0.2.0
 
 - Fetches a transaction by signature and shows status, time, fee, fee payer and signers
